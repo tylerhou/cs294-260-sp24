@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  <title> Welcome | CS294-260 </title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:title" content="Welcome" />
+  <style>
+    body {
+      margin: 0 auto;
+      max-width: 1200px;
+      padding: 0 1em;
+      background-color: #FED;
+      color: #111;
+      font-size: 120%;
+      line-height: 1.2;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    nav a {
+      padding: 0.5ex;
+    }
+
+    footer {
+      text-align: center;
+      padding-top: 3em;
+      color: #666;
+      font-size: 70%;
+    }
+  </style>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        processEscapes: true,
+        tags: 'ams',
+      },
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+  <main>
+    <h1 class="center"> Declarative Program Analysis and Optimization </h1>
+    <h3 class="center"> CS294-260, Spring 2024 </h3>
+
+    <nav class="center">
+      <div id="links">
+        <a href="/~cs294-260/sp24/">Home</a>
+        
+        <a href="/~cs294-260/sp24/2024-01-17-welcome">Policies</a>
+        <a href="https://bcourses.berkeley.edu/courses/1532818">bCourses</a>
+        
+      </div>
+    </nav>
+
+    <style>
+    #post {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+</style>
+
+<div id="post" class="content">
+
+    <h2>Welcome</h2>
+
+    <ul>
+        <li><time>Wednesday, January 17, 2024</time></li>
+        
+        
+    </ul>
+
+    <h2 id="course-info">Course Info</h2>
+
+<p><strong>Please take the <a href="https://docs.google.com/forms/d/e/1FAIpQLSdQTYnypi4wtiIMCc8cctW0KTjlcqMbIhyPMySda36L5APyEg/viewform?usp=sf_link">pre-course survey ASAP</a>!</strong></p>
+
+<p>Welcome! The purpose of this course is to get exposure
+ to some of the various declarative techniques 
+ for program analysis and optimization.
+We will study term rewriting systems, datalog, and equality saturation.
+One major theme is that these techniques share many common through-lines,
+ despite their apparent differences.</p>
+
+<h2 id="grading">Grading</h2>
+
+<p>This class consists partly of lectures, and partly paper discussions.
+Attendance, reading of assigned papers, 
+ and participation are essential for this course
+ to be useful and enjoyable, so the grading reflects that.</p>
+
+<ul>
+  <li>30% Participation</li>
+  <li>30% Discussion Lead</li>
+  <li>40% Final Project / Presentation</li>
+</ul>
+
+<h2 id="paper-discussion">Paper Discussion</h2>
+
+<p>Each discussion will be led by a small group of students, the discussion leads.
+The leads will be responsible for:</p>
+
+<ul>
+  <li>Leading group discussion.
+    <ul>
+      <li>Presenting the reading guide at the beginning of class
+as a summary of the paper and prompting discussion (~5 min).
+        <ul>
+          <li>You are welcome to also bring slides (of your own making or found),
+project the reading guide, project the paper, use the whiteboard, etc.</li>
+        </ul>
+      </li>
+      <li>Part of class will be split into breakouts,
+<strong>one lead per breakout</strong>,
+so each lead should be prepared to lead a discussion (~20-30 min).</li>
+      <li>Re-convening the class and summarizing the discussion
+from their breakout (~5 min).</li>
+      <li>Leading the remainder of the discussion.</li>
+    </ul>
+  </li>
+  <li>Reading the <strong>entire paper</strong> well-ahead of time.
+    <ul>
+      <li>You will only be lead a couple times during the course,
+so really diving into the paper is important.</li>
+      <li>Use all the resources at your disposal to understand the paper, 
+including your co-leads, the instructor, other references, 
+and the fact that you can start reading the paper well-ahead of time.</li>
+    </ul>
+  </li>
+  <li>Preparing a <strong>reading guide</strong> for the paper and submitting it to this website.
+    <ul>
+      <li>The reading guide should be a short document (1-2 pages)
+that summarizes the paper and highlights the most important points,
+as well helps the everyone else effectively read the paper in <strong>1-2 hours</strong>.</li>
+      <li>The reading guide should include a few <strong>discussion questions</strong>.
+        <ul>
+          <li>Class discussion is not limited to these of course,
+but they should help guide the readers as they go through the paper.</li>
+        </ul>
+      </li>
+      <li>The reading guide is due <strong>48 hours</strong> before the discussion begins
+via pull request to this repository.
+        <ul>
+          <li>Go to the page for your discussion and click 
+the “Edit this page” link in the footer to create a pull request.</li>
+        </ul>
+      </li>
+      <li>The reading guide should also point to any other resources
+useful for understanding the paper (e.g. other papers, blog posts, presentations, etc.), 
+or that could be good jumping-off points for a project.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>If you are not the lead, 
+ you still must read the paper and the reading guide
+ before the discussion begins.
+You may of course start reading the paper early,
+ but you may not have access to the reading guide
+ until 48 hours before the discussion.</p>
+
+<h2 id="projects">Projects</h2>
+
+<p>The final project is an opportunity to explore a topic of your choice
+ related to the course material.
+You may work in pairs or by yourself,
+ either is totally fine.</p>
+
+<p>The project is meant to be flexible and open-ended,
+ here are some ways that you might approach it:</p>
+
+<ul>
+  <li>Re-implement or extend a tool from a paper</li>
+  <li>Perform a survey on a few papers in a deeper area than we got a chance to cover in class</li>
+  <li>Apply some of the ideas from the course to your own research</li>
+  <li>Anything else!</li>
+</ul>
+
+<h3 id="proposals">Proposals</h3>
+
+<p>After spring break, 
+ groups will present 
+ a short presentation on their project proposal
+ as well as submit a short writeup.</p>
+
+<h3 id="meetings">Meetings</h3>
+
+<p>A large chunk of the course is dedicated to the final project.
+During that time,
+ each group will meet with me weekly to discuss their progress.
+These meetings are an opportunity to get early feedback on your project,
+ and to help hone in the scope of your project
+ so that you can make the best presentation by the end of the course.</p>
+
+<h3 id="presentations-and-report">Presentations and Report</h3>
+
+<p>The final deliverables for the project are:</p>
+<ul>
+  <li>A 20ish minute presentation given during the last week of class</li>
+  <li>A short report (4-6 pages) due before the first day of project presentations
+    <ul>
+      <li>Report length should vary based on the kind of project. 
+For example, a survey report should be longer than that of an implementation project.</li>
+    </ul>
+  </li>
+</ul>
+
+
+
+    <!-- <style>
+        #topButton {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+        }
+    </style>
+    <button id="topButton">
+        <a href=" #"> Back to top </a>
+    </button> -->
+</div>
+  </main>
+  <footer>
+    Site last updated on 2024-02-19.
+    Edit me on <a href="https://github.com/mwillsey/cs294-260-sp24/blob/main/_posts/2024-01-17-welcome.md">Github</a>.
+  </footer>
+</body>
+
+</html>

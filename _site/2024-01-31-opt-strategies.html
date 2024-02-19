@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  <title> Achieving High Performance the Functional Way: Expressing High-Performance Optimizations as Rewrite Strategies | CS294-260 </title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:title" content="Achieving High Performance the Functional Way: Expressing High-Performance Optimizations as Rewrite Strategies" />
+  <style>
+    body {
+      margin: 0 auto;
+      max-width: 1200px;
+      padding: 0 1em;
+      background-color: #FED;
+      color: #111;
+      font-size: 120%;
+      line-height: 1.2;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    nav a {
+      padding: 0.5ex;
+    }
+
+    footer {
+      text-align: center;
+      padding-top: 3em;
+      color: #666;
+      font-size: 70%;
+    }
+  </style>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        processEscapes: true,
+        tags: 'ams',
+      },
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+  <main>
+    <h1 class="center"> Declarative Program Analysis and Optimization </h1>
+    <h3 class="center"> CS294-260, Spring 2024 </h3>
+
+    <nav class="center">
+      <div id="links">
+        <a href="/~cs294-260/sp24/">Home</a>
+        
+        <a href="/~cs294-260/sp24/2024-01-17-welcome">Policies</a>
+        <a href="https://bcourses.berkeley.edu/courses/1532818">bCourses</a>
+        
+      </div>
+    </nav>
+
+    <style>
+    #post {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+</style>
+
+<div id="post" class="content">
+
+    <h2>Achieving High Performance the Functional Way: Expressing High-Performance Optimizations as Rewrite Strategies</h2>
+
+    <ul>
+        <li><time>Wednesday, January 31, 2024</time></li>
+        
+        <li class="lead">Discussion lead: Sora, Eric</li>
+        <ul>
+            <li class="lead"> Reading guide due
+                
+                <b> Monday, January 29 </b>
+                at 2:30pm
+            </li>
+        </ul>
+        
+        
+        <li><a href="./papers/high-perf-the-functional-way.pdf">Paper link</a></li>
+        
+    </ul>
+
+    <h3 id="problem">Problem:</h3>
+<p>Mixing hardware-specific optimizations with functionality-concerned code presents a huge challenge to portability across hardware. Existing approaches to separating optimizations rely on developer-written API calls, in which users 1. have limited ability to inspect and reason about 2. can’t easily build and reuse higher abstractions 3. have difficulty separating optimizations from functionality because these optimizations are written within the same program and scope.</p>
+
+<h3 id="solution">Solution:</h3>
+<p>In short, the solution is functional programming. Authors apply a functional paradigm to the scheduling process itself, which allows users to express optimizations via rewrite rules in a functional language, which, they argue, avoids the issues listed above. Importantly, they allow the expression of 1. Rewrite rules as strategies 2. Transformations of strategies as traversals. Authors present two functional languages: RISE, a language for expressing data-parallel algorithms, and ELEVATE, a language for describing optimization strategies in the form of rewrite rules.</p>
+
+<p>We see the main contribution as providing 1. A high-level functional language, RISE, which allows programmers to succinctly express high-dimensional array computations with a focus on intent and functionality. 2. A functional language, ELEVATE, in which programmers dictate how high-level RISE primitives are re-written to low-level RISE primitives. 3. <strong>a set of low-level RISE primitives</strong> and a <em>strategy preserving</em> code generator for those primitives. Ultimately, this separates both the algorithm and scheduling concerns for the programmer, but also separates the compilation process into discrete optimization and code generation steps.</p>
+
+<p>Some things to look out for as you read the paper:</p>
+<ol>
+  <li>Pay attention to how authors <em>normalize</em> programs, relying on a initial rewrite step to put programs into a standard form (the <em>data-flow normal form</em>). The algorithm is explained in much greater detail in the full paper (linked below), but the big idea is that we have to do some significant transformation on the programs initially to get them into a suitable form for later pattern matching.</li>
+  <li>Spend some time looking at how <em>traversals</em> are used to dictate where and when rewrite rules are applied. For instance, see how they can implement the “tryAll” strategy using their fairly simple primitives, which allows them to describe fairly complex behavior about how specific rewrites are each applied.</li>
+  <li>Think through how each of the goals the authors outline (1. Separation of concerns, 2 facilitating reuse, 3. Enabling composability, 4. Allow reasoning, 5. Making explicit) are accomplished, and which design choices influence these factors.</li>
+</ol>
+
+<h2 id="questions-for-discussion">Questions For Discussion:</h2>
+
+<ol>
+  <li>Comparing this paper to “Playing by the Rules”, does this paper implement a rewriting system which addresses some of the earlier paper’s shortcomings?
+ a. In particular, to our discussion last Wednesday of the three “roles” of end-user programmer, library designer, and compiler engineer, how does this paper construe these three roles? What design decisions do they make which influence the separation (or lack thereof) between these roles? 
+ b. What specific skills or knowledge does this system presuppose of the programmer?</li>
+  <li>How does ELEVATE decide the priority of rewrite rules? (Hint: the programmer defines it explicitly). How should we be thinking about termination here? What are the pros/cons of thinking about rewrite priority this way? 
+ a. The authors indicate that a type system could address some of these issues - do you think so?</li>
+  <li>One of the big concerns of the authors is in separating the algorithm from the schedule, citing the case with TensorFlow where programmers have to change the algorithm in response to the scheduling code, breaking the separation of concerns. Do the authors here actually get out of this? Does writing a good RISE program already require some kind of mental model of how it will be rewritten in ELEVATE, and if so, have we made optimization conceptually easier for programmers actually?</li>
+</ol>
+
+<p>For more information, you can also check out the <a href="https://bastianhagedorn.github.io/files/publications/2020/ICFP-2020.pdf">full-length version of this pape</a>.</p>
+
+<p>See also this short commentary on the paper:
+<a href="https://dl.acm.org/doi/pdf/10.1145/3580370">Reconsidering the Design of User-Schedulable Languages</a>.
+Also, see a 
+ bigger <a href="https://inria.hal.science/hal-01143486/file/HK-RewStrat.pdf">survey of rewriting strategies</a>
+ or a recent paper on
+ <a href="https://michel.steuwer.info/files/publications/2024/POPL-2024-1.pdf">formal semantics for strategies</a>.
+Some of the same folks did another work that used e-graphs to optimize RISE programs as well: <a href="https://dl.acm.org/doi/10.1145/3632900">Guided Equality Saturation</a>.</p>
+
+
+    <!-- <style>
+        #topButton {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+        }
+    </style>
+    <button id="topButton">
+        <a href=" #"> Back to top </a>
+    </button> -->
+</div>
+  </main>
+  <footer>
+    Site last updated on 2024-02-19.
+    Edit me on <a href="https://github.com/mwillsey/cs294-260-sp24/blob/main/_posts/2024-01-31-opt-strategies.md">Github</a>.
+  </footer>
+</body>
+
+</html>

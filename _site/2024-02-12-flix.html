@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  <title> From Datalog to Flix: A Declarative Language for Fixed Points on Lattices | CS294-260 </title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:title" content="From Datalog to Flix: A Declarative Language for Fixed Points on Lattices" />
+  <style>
+    body {
+      margin: 0 auto;
+      max-width: 1200px;
+      padding: 0 1em;
+      background-color: #FED;
+      color: #111;
+      font-size: 120%;
+      line-height: 1.2;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    nav a {
+      padding: 0.5ex;
+    }
+
+    footer {
+      text-align: center;
+      padding-top: 3em;
+      color: #666;
+      font-size: 70%;
+    }
+  </style>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        processEscapes: true,
+        tags: 'ams',
+      },
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+  <main>
+    <h1 class="center"> Declarative Program Analysis and Optimization </h1>
+    <h3 class="center"> CS294-260, Spring 2024 </h3>
+
+    <nav class="center">
+      <div id="links">
+        <a href="/~cs294-260/sp24/">Home</a>
+        
+        <a href="/~cs294-260/sp24/2024-01-17-welcome">Policies</a>
+        <a href="https://bcourses.berkeley.edu/courses/1532818">bCourses</a>
+        
+      </div>
+    </nav>
+
+    <style>
+    #post {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+</style>
+
+<div id="post" class="content">
+
+    <h2>From Datalog to Flix: A Declarative Language for Fixed Points on Lattices</h2>
+
+    <ul>
+        <li><time>Monday, February 12, 2024</time></li>
+        
+        <li class="lead">Discussion lead: Tianrui, Altan</li>
+        <ul>
+            <li class="lead"> Reading guide due
+                
+                <b> Saturday, February 10 </b>
+                at 2:30pm
+            </li>
+        </ul>
+        
+        
+        <li><a href="papers/datalog-to-flix.pdf">Paper link</a></li>
+        
+    </ul>
+
+    <h2 id="summary">Summary</h2>
+<p>This paper presents Flix, an extension of Datalog to support lattices and
+monotone functions. The authors show how to naturally extend the model theoretic
+semantics of Datalog to Flix, although some care is taken to ensure that the
+naive and semi-naive evaluation strategies still work. Finally, Flix is used
+to implement several program analyses from the literature that are practically
+infeasible with Datalog. The results show that an unoptimized Flix runtime is
+able to scale with optimized baselines, although between 2.5-3.1x slower.</p>
+
+<h2 id="background-notes">Background Notes</h2>
+
+<p><strong>Lattices and program analysis.</strong>
+The paper gives the definition of a (complete) lattice, as well as some example
+lattices used in program analyses. To summarize at a higher level, lattice
+values correspond to abstractions of concrete program values. Since the set of
+possible concrete values is typically (practically) infinite, tractable analysis
+can only be performed over a smaller abstracted set of values. In general, we
+are concerned with the “small” lattice elements (i.e. those closer to ⊥), since
+those elements are more “specific” in a sense. This is why it’s natural to
+extend the minimal model semantics of Datalog to Flix by requiring minimality to
+respect the lattice orders.</p>
+
+<p><strong>Minimal model semantics of Datalog.</strong>
+Here is another way to read some of the definitions in this section:</p>
+
+<ul>
+  <li>the Herbrand universe $U$ is the set of all constant values in your Datalog program,</li>
+  <li>if $F$ is the set of all relation symbols your program, then the Herbrand base $B$
+is the set of all $A(v_1,…,v_n)$, where $A$ is from $F$ (of arity $n$) and $v$ is from $U$.</li>
+</ul>
+
+<p>The minimal model satisfies all “input facts” (the extensional database) as well
+as all facts derived from the input (the intensional database), with no “extra”
+facts.</p>
+
+<h2 id="extending-datalog-to-flix">Extending Datalog to Flix</h2>
+
+<p>The authors extend Datalog to Flix by making every relation effectively a map
+from non-lattice values to lattice values. Thus, a relation $A(x_1,…,x_n)$ from
+Datalog becomes $A_L(x_1,…,x_n,v)$ in Flix, where L is a lattice and v is from L.
+Each relation $A_L$ and “key” $(x_1,…,x_n)$ defines a “cell” of the newly extended
+Herbrand base. Since the key is drawn from the non-lattice universe, it follows
+that there are finitely many cells, although the cells may be infinite in size
+(if the underlying lattice is infinite).</p>
+
+<p>This motivates the notion of “compactness”, which states that every cell has a
+single value. Compactness is what lets us actually run the naive and semi-naive
+evaluation strategies on Flix.</p>
+
+<p>Finally, a fact is satisfied in Flix as long as the interpretation has a larger
+fact (of the same cell) with respect to the lattice order.</p>
+
+<h2 id="lattice-operation-in-flix">Lattice Operation in Flix</h2>
+
+<p>In this subsection, we correspond operations in lattices to those in the
+language flix.</p>
+
+<p>Suppose we have fact <code class="highlighter-rouge">A(x)</code> and <code class="highlighter-rouge">B(x)</code></p>
+
+<h3 id="join-in-a-lattice">Join in a lattice</h3>
+
+<p>Join operation over a set of lattice S computes the least upper bound of the
+lattice in S.</p>
+
+<p>In flix, joining of lattice could be computed as</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>R(x) :- A(x)
+R(x) :- B(x)
+</code></pre></div></div>
+
+<h3 id="meet-in-lattice-domain">Meet in lattice domain</h3>
+
+<p>Meet operation over a set of lattice S computers the greatest lower
+bound of the lattice in S.</p>
+
+<p>In flix, meet of a set of lattice could be expressed as</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>R(x) :- A(x), B(x)
+</code></pre></div></div>
+
+<h2 id="executing-flix">Executing Flix</h2>
+<p>A few key points:</p>
+
+<ul>
+  <li>To ensure compactness, collapse each cell to the least upper bound of its
+contents before applying the immediate consequence operator.</li>
+  <li>Filter functions (which are just monotone functions to the boolean lattice)
+connect lattice values to the “relational” side.</li>
+  <li>General monotone functions must be executed after the body; once you’ve
+determined a fact on the RHS, the monotone function tells you where to put
+it (e.g. sum(x, y) rather than x or y).</li>
+  <li>Direct products of flix are available, however logical and reduced products
+(which are more precise than direct products) are not available (needs manual
+implementation). This means that results in flix are over-approximation of the
+original result.</li>
+</ul>
+
+<h2 id="semi-naive-evaluation-in-flix">Semi-Naive Evaluation in flix</h2>
+
+<p>In flix, one key difference is made for semi-naive evaluation from Datalog.
+In datalog, the increments of a new set is the tuples added to the old set.
+However, in flix, the increments is computed as the set of ground atom in the
+new set which is not LEQ than the ground atom of the same cell as the original
+set. This new requirement is because the compactness of flix programs.</p>
+
+<h2 id="evaluation">Evaluation</h2>
+<p>Most of this section can be skimmed, since it needs a good bit of background
+(see the Strong Update, IFDS, and IDE papers).</p>
+
+<p>The takeaway is that the declarative similarities between the analyses becomes
+much more apparent when the operational details (such as complex mutual recursion)
+are elided.</p>
+
+<p>Finally, the results show that Flix can:</p>
+
+<ol>
+  <li>scale beyond naive Datalog encodings of lattice-based analyses, although
+lagging much behind a native c++ implementation</li>
+  <li>match the scaling of an imperative implementation of IFDS, although with a
+consistent ~3x slowdown.</li>
+</ol>
+
+<h2 id="reading-questions">Reading Questions</h2>
+
+<ul>
+  <li>Flix does not support negation (in the paper), but not necessarily due to the
+difficulty of extending stratified negation from Datalog. What would it mean
+to negate a lattice element? Is it even well defined, generally?</li>
+  <li>What do we lose by requiring compactness, if anything?</li>
+  <li>This version of Flix does not have any query optimization. Is it as “simple”
+as doing what Doop did, or do lattices and transfer functions make it harder?</li>
+  <li>Flix chokes on Strong Update compared to the C++ baseline. The authors claim
+this is due to some kind of implicit representation in the C++ implementation.
+Is there an opportunity for compression or sharing in Flix, or even Datalog?
+Is this related to BDDs?</li>
+</ul>
+
+<h2 id="discussion-questions">Discussion Questions</h2>
+
+<ul>
+  <li>How to implement logical and reduced product in flix <em>manually</em></li>
+  <li>Can you think of how to improve flix to avoid excessively representing lattice
+values of $\top$ and $\bot$?</li>
+  <li>Safety guarantee provided by Datalog is still not implemented by flix. Which
+part in its generalization do you think makes it difficult?</li>
+</ul>
+
+<p>See also:</p>
+<ul>
+  <li>The <a href="https://flix.dev/">Flix website</a>, where it has evolved into a full-fledged language.</li>
+  <li>A similar system implemented in Rust: <a href="https://dl.acm.org/doi/abs/10.1145/3497776.3517779">Seamless deductive inference via macros</a></li>
+  <li>Datalog over semi-rings</li>
+</ul>
+
+
+    <!-- <style>
+        #topButton {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+        }
+    </style>
+    <button id="topButton">
+        <a href=" #"> Back to top </a>
+    </button> -->
+</div>
+  </main>
+  <footer>
+    Site last updated on 2024-02-19.
+    Edit me on <a href="https://github.com/mwillsey/cs294-260-sp24/blob/main/_posts/2024-02-12-flix.md">Github</a>.
+  </footer>
+</body>
+
+</html>

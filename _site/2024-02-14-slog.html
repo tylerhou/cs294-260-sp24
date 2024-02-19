@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  <title> Slog: Higher-Order, Data-Parallel Structured Deduction | CS294-260 </title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:title" content="Slog: Higher-Order, Data-Parallel Structured Deduction" />
+  <style>
+    body {
+      margin: 0 auto;
+      max-width: 1200px;
+      padding: 0 1em;
+      background-color: #FED;
+      color: #111;
+      font-size: 120%;
+      line-height: 1.2;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    nav a {
+      padding: 0.5ex;
+    }
+
+    footer {
+      text-align: center;
+      padding-top: 3em;
+      color: #666;
+      font-size: 70%;
+    }
+  </style>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        processEscapes: true,
+        tags: 'ams',
+      },
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+  <main>
+    <h1 class="center"> Declarative Program Analysis and Optimization </h1>
+    <h3 class="center"> CS294-260, Spring 2024 </h3>
+
+    <nav class="center">
+      <div id="links">
+        <a href="/~cs294-260/sp24/">Home</a>
+        
+        <a href="/~cs294-260/sp24/2024-01-17-welcome">Policies</a>
+        <a href="https://bcourses.berkeley.edu/courses/1532818">bCourses</a>
+        
+      </div>
+    </nav>
+
+    <style>
+    #post {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+</style>
+
+<div id="post" class="content">
+
+    <h2>Slog: Higher-Order, Data-Parallel Structured Deduction</h2>
+
+    <ul>
+        <li><time>Wednesday, February 14, 2024</time></li>
+        
+        <li class="lead">Discussion lead: Jiwon, Altan</li>
+        <ul>
+            <li class="lead"> Reading guide due
+                
+                <b> Monday, February 12 </b>
+                at 2:30pm
+            </li>
+        </ul>
+        
+        
+        <li><a href="https://arxiv.org/abs/2211.11573">Paper link</a></li>
+        
+    </ul>
+
+    <h1 id="slog-reading-guide">Slog Reading Guide</h1>
+
+<h2 id="summary">Summary</h2>
+<p>This paper presents Slog, an extension of Datalog to higher-order relations, as
+well as a runtime system for massively parallel execution of Slog programs.
+The key difference between Slog and regular Datalog is native support for
+recursive/nested facts, which is especially useful for implementing various
+reduction systems. This is achieved by aggressively interning terms (c.f.
+hash consing), together with special handling of the equality relation.
+Slog’s runtime system is essentially a parallel relational algebra engine,
+utilizing distributed hash joins with additional optimizations (including a new
+improvement in all-to-all communication by many of the same authors).
+Finally, Slog is evaluated on a variety of program analysis tasks, and shows
+good scalability under a massively parallel context.</p>
+
+<h2 id="extending-datalog-to-higher-order-relations">Extending Datalog to Higher-Order Relations</h2>
+<p>The main motivation of Slog is to enable reasoning over (tree-structured) terms.
+Per the paper, to encode the term <code class="highlighter-rouge">(lam "x" (ref "x"))</code>, one needs to “flatten”
+the term into something of the form</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(= lam-id (lam "x" ref-id))
+(= ref-id (ref "x"))
+</code></pre></div></div>
+<p>It’s worth noting here that this is essentially the
+<a href="https://en.wikipedia.org/wiki/A-normal_form">A-normal form</a> for functional
+languages, which is also related to continuation-passing style (CPS).</p>
+
+<p>Formally, Slog (DL_S) extends Datalog by letting the Herbrand base be an
+inductively defined set, rather than a finite set of values. The paper gives
+the example of natural numbers, which can be encoded by</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>V = {0} U {(succ v) | v in V}.
+</code></pre></div></div>
+<p>Then, when determining the truth value of a Slog rule under a given
+interpretation, the variables in the rule may be substituted with any (compound)
+terms from V, rather than just literals. This adds an additional layer of
+recursion to Datalog.</p>
+
+<h2 id="slogs-syntactic-sugar-and-further-extensions">Slog’s Syntactic Sugar (and Further Extensions)</h2>
+<p>Slog provides syntactic sugar for interacting with the interning indices.
+For example, to simultaneously bind a term (with free variables) and refer to
+it in another rule, one can use the <code class="highlighter-rouge">?</code> syntax:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(free ?(ref x) x) ~&gt; [(= e-id (ref x)) --&gt; (free e-id x)].
+</code></pre></div></div>
+
+<p>Slog also allows for disjunctions in the body, unlike Datalog which defines
+unions of conjunctive queries separately. This lets free variables from the
+branches to appear jointly in the head, as shown in the example</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(or (free Ef x) (free Ea x)) --&gt; (free ?(app Ef Ea) x).
+</code></pre></div></div>
+
+<p>Finally, Slog enables on-demand fact generation through the <code class="highlighter-rouge">!</code> syntax, which
+produces facts when the surrounding rule is sufficiently satisfied.
+Slog can also support functions through the <code class="highlighter-rouge">{}</code> syntax.</p>
+
+<h2 id="evaluation-and-implementation">Evaluation and Implementation</h2>
+<p>This is a very dense section of the paper, so we won’t dive too much into the
+details as it requires a good chunk of PL, HPC, and databases background.
+Instead, we provide references for the interested reader.</p>
+
+<p>The conclusion of this section is that Slog is able to implement a good variety
+of program analyses previously impractical or impossible to implement in pure
+Datalog. Additionally, the implementation is able to scale to thousands of threads,
+due to highly optimized parallel relational algebra and communication primitives.</p>
+
+<h3 id="evaluation">Evaluation</h3>
+<ul>
+  <li><a href="https://www.inf.ed.ac.uk/teaching/courses/lsi/diehl_abstract_machines.pdf">Abstract Machines</a></li>
+  <li><a href="https://dl.acm.org/doi/10.1145/1863543.1863553">Abstracting Abstract Machines</a></li>
+  <li>Type Systems: <a href="https://www.cis.upenn.edu/~bcpierce/tapl/">TAPL</a></li>
+</ul>
+
+<h3 id="implementation">Implementation</h3>
+<ul>
+  <li><a href="https://dl.acm.org/doi/abs/10.1145/3502181.3531468">Optimized Bruck Algorithm</a></li>
+  <li><a href="https://faculty.cc.gatech.edu/~jarulraj/courses/4420-f20/slides/24-parallel-hash-join.pdf">Parallel Hash Join</a></li>
+</ul>
+
+<h2 id="readingdiscussion-questions">Reading/Discussion Questions</h2>
+<ul>
+  <li>Slog seems to allow nonterminating programs.
+    <ul>
+      <li>Is this ever useful for Slog programs? (c.f. egraph might never saturate…)</li>
+      <li>If not, is there a reasonable way to prevent it from happening?
+(halting problem…)</li>
+    </ul>
+  </li>
+  <li>How does Slog relate to egglog? Both seem to treat equality specially, and
+do hash consing.</li>
+  <li>How does the <code class="highlighter-rouge">!</code> operator actually work?</li>
+</ul>
+
+<p>See also:</p>
+<ul>
+  <li><a href="https://github.com/harp-lab/rosetta-slog">A big repo full of Slog examples</a></li>
+  <li><a href="https://codeql.github.com/publications/algebraic-data-types.pdf">Algebraic Data Types for Object-oriented Datalog</a>, used in Github’s <a href="https://codeql.github.com/">CodeQL</a> system.</li>
+  <li>The chase, datalog+-, existential rules, and other extensions to datalog.</li>
+</ul>
+
+
+    <!-- <style>
+        #topButton {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+        }
+    </style>
+    <button id="topButton">
+        <a href=" #"> Back to top </a>
+    </button> -->
+</div>
+  </main>
+  <footer>
+    Site last updated on 2024-02-19.
+    Edit me on <a href="https://github.com/mwillsey/cs294-260-sp24/blob/main/_posts/2024-02-14-slog.md">Github</a>.
+  </footer>
+</body>
+
+</html>
