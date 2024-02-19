@@ -222,6 +222,11 @@ in which case `fact` would indeed be range-restricted. However, bottom-up
 computation of e.g. `fact(5)` would still not terminate because the `successor`
 relation has infinite size.
 
+However, the larger point the authors are making here is the difficulty of 
+programming in Datalog. The need to come up with an intermediate relation
+to work around the range restrictions is what the authors consider an implementation
+detail which they aim to fix in their language.
+
 #### Intuition for range-restriction
 
 Consider the model-theoretic semantics of Datalog. Recall that the Herbrand
@@ -362,9 +367,14 @@ The union of both sets represents all possible values the entire expression
 might evaluate to in either case.
 
 ### Reading questions
+1. How does this language compare to other extensions to Datalog we have seen?
+Compare the first-order function compilation in functional IncA with, e.g. the
+? and ! clauses in Slog. 
 
 ### Discussion questions
-
+1. The authors present functional IncA as a new paradigm of using Datalog as an IR
+that can be plugged into various Datalog solvers on the backend. Should other 
+Datalog DSLs and extensions be aiming to replicate this approach?
 
 
 See also:
