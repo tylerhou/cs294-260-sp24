@@ -368,13 +368,15 @@ might evaluate to in either case.
 
 ### Reading questions
 1. How does this language compare to other extensions to Datalog we have seen?
-Compare the first-order function compilation in functional IncA with, e.g. the
-? and ! clauses in Slog. 
+Compare the first-order function compilation in functional IncA with, e.g. 
 
 ### Discussion questions
 1. The authors present functional IncA as a new paradigm of using Datalog as an IR
-that can be plugged into various Datalog solvers on the backend. Should other 
-Datalog DSLs and extensions be aiming to replicate this approach?
+that can be plugged into various Datalog solvers on the backend. Does the fact that 
+the Soufflé backend doesn't support user-defined aggregations weaken this claim, 
+or is this a small enough feature to not matter?
+2. Are the fixpoint semantics of Datalog enough to justify using functional IncA 
+over another functional language that is not based on Datalog?
 
 
 See also:
